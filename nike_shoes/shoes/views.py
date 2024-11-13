@@ -1,6 +1,7 @@
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views.generic import ListView, DetailView, TemplateView, View
 from .models import Shoe, Cart, CartItem
+from .forms import ShoeForm
 
 
 def home(request):
@@ -108,3 +109,13 @@ def remove_from_cart(request, item_id):
     cart_item = get_object_or_404(CartItem, id=item_id)
     cart_item.delete()
     return redirect('view_cart')
+
+def add_shoe(request):
+    if request.method == 'POST':
+        form = ShoeForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()  # Save the new shoe to the database
+            return redirect('home')  # Redirect to home page after adding shoe
+    else:
+        form = ShoeForm()
+    return render(request, 'add_shoe.html', {'form': form})
