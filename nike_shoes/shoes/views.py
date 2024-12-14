@@ -1,8 +1,10 @@
+from django.conf import settings
 from django.core.mail import send_mail
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views.generic import ListView, DetailView, TemplateView, View
 
 from .forms import ShoeForm
+from .tasks import send_email_task
 from .models import Shoe, Cart, CartItem
 
 
@@ -117,12 +119,12 @@ def add_shoe(request):
         form = ShoeForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()  # Save the new shoe to the database
-            send_mail(
+            send_email_task.delay(
                 "New Shoe listing created",
                 "Thank you for using our website.We are glad to server you and help to sell your shoes.😁",
-                "dvlpr37@gmail.com",
+                f"${settings.EMAIL_HOST_USER}",
                 ["dvlpr37@gmail.com"],
-                fail_silently=False,
+                #fail_silently=False,
             )
             return redirect('home')  # Redirect to home page after adding shoe
     else:
